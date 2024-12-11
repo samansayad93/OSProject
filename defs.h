@@ -191,4 +191,4 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 //this is change 
 int sys_set_limit(void);
-int set_limit(int limit);
+int set_limit(int cpu_limit, int mem_limit);
