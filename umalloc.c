@@ -6,6 +6,14 @@
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
 
+int sys_check_memory_allocation(uint size) {
+  return size;  // Placeholder. Actual implementation will be in sysproc.c
+}
+
+int sys_track_memory_free(uint size) {
+  return size;  // Placeholder. Actual implementation will be in sysproc.c
+}
+
 typedef long Align;
 
 union header {
@@ -25,8 +33,16 @@ void
 free(void *ap)
 {
   Header *bp, *p;
+  uint size;
 
   bp = (Header*)ap - 1;
+
+  // Calculate size to be freed
+  size = bp->s.size * sizeof(Header);
+  
+  // Notify kernel about memory being freed
+  sys_track_memory_free(size);
+
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
       break;
@@ -60,9 +76,15 @@ morecore(uint nu)
   return freep;
 }
 
+// this is changed code
+
 void*
 malloc(uint nbytes)
 {
+  if(!sys_check_memory_allocation(nbytes)) {
+    return 0;  // Allocation denied
+  }
+
   Header *p, *prevp;
   uint nunits;
 

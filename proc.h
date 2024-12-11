@@ -53,6 +53,10 @@ struct proc {
   int cpu_limit;       // CPU usage limit percentage
   int cpu_usage_ms;    // Cumulative CPU usage in milliseconds
   uint last_check_tick;// Last tick when CPU usage was checked
+  
+  //this is for memory limit
+  int memory_limit;        // Memory limit in bytes
+  int current_memory_used; // Current memory usage in bytes
 };
 
 // Process memory is laid out contiguously, low addresses first:

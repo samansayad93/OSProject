@@ -23,3 +23,6 @@
 
 //this is change
 #define SYS_set_limit 22
+
+#define SYS_check_memory_allocation 23
+#define SYS_track_memory_free 24

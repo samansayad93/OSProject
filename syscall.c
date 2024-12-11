@@ -106,6 +106,9 @@ extern int sys_uptime(void);
 //this is change
 extern int sys_set_limit(void);
 
+extern int sys_check_memory_allocation(void);
+extern int sys_track_memory_free(void);
+
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -130,6 +133,9 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 //this is change
 [SYS_set_limit] sys_set_limit,
+
+[SYS_check_memory_allocation]  sys_check_memory_allocation,
+[SYS_track_memory_free]  sys_track_memory_free,
 };
 
 void

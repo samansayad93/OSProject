@@ -30,6 +30,65 @@ sys_set_limit(void)
 }
 
 int
+sys_check_memory_allocation(void)
+{
+    int size;
+    struct proc *p;
+
+    // Get the size argument
+    if(argint(0, &size) < 0)
+        return 0;
+
+    // Get current process
+    p = myproc();
+
+    // No limit set
+    if(p->memory_limit <= 0)
+        return 1;
+
+    // Check if allocation would exceed limit
+    if(p->current_memory_used + size > p->memory_limit){
+        cprintf("Memory allocation denied: current = %d, size = %d, limit = %d\n",
+                p->current_memory_used, size, p->memory_limit);
+        return 0;  // Deny allocation
+    }
+
+    p->current_memory_used += size;  
+    cprintf("Checking memory allocation: current = %d, size = %d, limit = %d\n", 
+        p->current_memory_used, size, p->memory_limit);
+
+    return 1;  // Allow allocation
+}
+
+int
+sys_track_memory_free(void)
+{
+    int size;
+    struct proc *p;
+
+    // Get the size argument
+    if(argint(0, &size) < 0)
+        return 0;
+
+    // Get current process
+    p = myproc();
+
+    // Reduce memory usage tracking
+    if(p) {
+        p->current_memory_used -= size;
+        
+        // Ensure we don't go negative
+        if(p->current_memory_used < 0)
+            p->current_memory_used = 0;
+
+        cprintf("Memory freed: current = %d, size = %d\n",
+                p->current_memory_used, size);
+    }
+
+    return 1;
+}
+
+int
 sys_fork(void)
 {
   return fork();
