@@ -35,6 +35,26 @@ sys_set_limit(void)
   return 0;
 }
 
+int sys_change_memory_usage(void){
+  int size;
+  struct proc *p;
+  if(argint(0, &size) < 0)
+    return 0;
+  
+  p = myproc();
+  if(p->memory_limit <= 0)
+    return 1;
+  if(p->current_memory_used + size > p->memory_limit){
+      cprintf("Memory allocation denied: current = %d, size = %d, limit = %d\n",
+              p->current_memory_used, size, p->memory_limit);
+    return 0;
+  }
+  p->current_memory_used += size;  
+  cprintf("Checking memory allocation: current = %d, size = %d, limit = %d\n", 
+      p->current_memory_used, size, p->memory_limit);
+  return 1;
+}
+
 int
 sys_fork(void)
 {

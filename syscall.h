@@ -23,3 +23,4 @@
 
 //this is change
 #define SYS_set_limit 22
+#define SYS_change_memory_usage 23

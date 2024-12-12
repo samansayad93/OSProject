@@ -25,8 +25,13 @@ void
 free(void *ap)
 {
   Header *bp, *p;
+  uint size;
 
   bp = (Header*)ap - 1;
+
+  size = bp->s.size * sizeof(Header);
+  change_memory_usage(-1*size);
+
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
       break;
@@ -63,6 +68,9 @@ morecore(uint nu)
 void*
 malloc(uint nbytes)
 {
+  if(!change_memory_usage(nbytes))
+    return 0;
+
   Header *p, *prevp;
   uint nunits;
 

@@ -31,3 +31,4 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 
 SYSCALL(set_limit)
+SYSCALL(change_memory_usage)

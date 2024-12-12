@@ -40,3 +40,4 @@ int atoi(const char*);
 
 //this the change
 int set_limit(int cpu_quota, int mem_quota);
+int change_memory_usage(int amount);
