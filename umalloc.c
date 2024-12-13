@@ -22,16 +22,9 @@ static Header base;
 static Header *freep;
 
 void
-free(void *ap)
-{
+infree(void *ap){
   Header *bp, *p;
-  uint size;
-
   bp = (Header*)ap - 1;
-
-  size = bp->s.size * sizeof(Header);
-  change_memory_usage(-1*size);
-
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
       break;
@@ -48,6 +41,20 @@ free(void *ap)
   freep = p;
 }
 
+void
+free(void *ap)
+{
+  Header *bp, *p;
+  uint size;
+
+  bp = (Header*)ap - 1;
+
+  size = bp->s.size * sizeof(Header);
+  change_memory_usage(-1*size);
+  
+  infree(ap);
+}
+
 static Header*
 morecore(uint nu)
 {
@@ -61,16 +68,12 @@ morecore(uint nu)
     return 0;
   hp = (Header*)p;
   hp->s.size = nu;
-  free((void*)(hp + 1));
+  infree((void*)(hp + 1));
   return freep;
 }
 
 void*
-malloc(uint nbytes)
-{
-  if(!change_memory_usage(nbytes))
-    return 0;
-
+imalloc(uint nbytes){
   Header *p, *prevp;
   uint nunits;
 
@@ -95,4 +98,13 @@ malloc(uint nbytes)
       if((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+
+void*
+malloc(uint nbytes)
+{
+  if(!change_memory_usage(nbytes))
+    return 0;
+  
+  return (void *)imalloc(nbytes);
 }
