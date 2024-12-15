@@ -4,6 +4,13 @@
 
 int main() {
     printf(1, "Memory Allocation Test\n");
+    int alloc_size = 512;
+    void *mem0 = malloc(alloc_size);
+    if (mem0 == 0) {
+        printf(1, "Allocation failed for %d bytes.\n", alloc_size);
+    } else {
+        printf(1, "Allocation succeeded for %d bytes.\n", alloc_size);
+    }
     // Set memory limit for the process
     int limit = 1024; // Limit in bytes
     printf(1, "Setting memory limit to %d bytes...\n", limit);
@@ -12,7 +19,6 @@ int main() {
         exit();
     }
     // Attempt to allocate within the limit
-    int alloc_size = 512;
     printf(1, "Allocating %d bytes...\n", alloc_size);
     void *mem1 = malloc(alloc_size);
     if (mem1 == 0) {

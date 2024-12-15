@@ -49,11 +49,11 @@ int sys_change_memory_usage(void){
               p->current_memory_used, size, p->memory_limit);
     return 0;
   }
+  cprintf("Checking memory allocation: current = %d, size = %d, limit = %d\n", 
+      p->current_memory_used, size, p->memory_limit);
   p->current_memory_used += size;
   if(p->current_memory_used < 0)
     p->current_memory_used = 0;
-  cprintf("Checking memory allocation: current = %d, size = %d, limit = %d\n", 
-      p->current_memory_used, size, p->memory_limit);
   return 1;
 }
 

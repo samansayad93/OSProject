@@ -49,7 +49,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
 
-  size = bp->s.size * sizeof(Header);
+  size = (bp->s.size-1) * sizeof(Header);
   change_memory_usage(-1*size);
   
   infree(ap);
