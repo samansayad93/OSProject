@@ -30,7 +30,6 @@ sys_set_limit(void)
     return -1;
   
   p->memory_limit = mem_limit;
-  p->current_memory_used = 0;
   
   return 0;
 }
@@ -42,15 +41,15 @@ int sys_change_memory_usage(void){
     return 0;
   
   p = myproc();
-  if(p->memory_limit <= 0)
-    return 1;
-  if(p->current_memory_used + size > p->memory_limit){
-      cprintf("Memory allocation denied: current = %d, size = %d, limit = %d\n",
-              p->current_memory_used, size, p->memory_limit);
-    return 0;
-  }
   cprintf("Checking memory allocation: current = %d, size = %d, limit = %d\n", 
       p->current_memory_used, size, p->memory_limit);
+  if(p->memory_limit <= 0){
+    p->current_memory_used += size;
+    return 1;
+  }
+  if(p->current_memory_used + size > p->memory_limit){
+    return 0;
+  }
   p->current_memory_used += size;
   if(p->current_memory_used < 0)
     p->current_memory_used = 0;
