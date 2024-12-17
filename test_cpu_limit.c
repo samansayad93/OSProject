@@ -25,7 +25,7 @@ int main() {
     
     // Then with 50% limit
     printf(1, "\n--- Task with 50% CPU Limit ---\n");
-    if (set_limit(50) < 0) {
+    if (set_limit(50,1) < 0) {
         printf(1, "Failed to set CPU limit\n");
         exit();
     }

@@ -105,6 +105,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 //this is change
 extern int sys_set_limit(void);
+extern int sys_change_memory_usage(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -130,6 +131,7 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 //this is change
 [SYS_set_limit] sys_set_limit,
+[SYS_change_memory_usage] sys_change_memory_usage,
 };
 
 void
