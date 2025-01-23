@@ -92,14 +92,6 @@ struct proc
 
 // Make chnages
 // define process
-#define NRESOURCE 4
-typedef struct resource
-{
-  int resourceid;  // Unique resource identifier
-  char name[4];    // Resource name
-  int acquired;    // Thread ID holding the resource
-  void *startaddr; // Memory start address for resource
-} Resource;
 
 enum nodetype
 {

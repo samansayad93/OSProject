@@ -7,6 +7,15 @@
 #include "proc.h"
 #include "spinlock.h"
 
+typedef struct resource
+{
+  int resourceid;  // Unique resource identifier
+  char name[4];    // Resource name
+  int acquired;    // Thread ID holding the resource
+  void *startaddr; // Memory start address for resource
+  struct spinlock lock; //spinlock for resources
+} Resource;
+
 struct
 {
   struct spinlock lock;
@@ -806,6 +815,7 @@ int requestresource(int resource_id)
 
   //cprintf("current pid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
   
+  acquire(&resources[resource_id].lock);
   if (resources[resource_id].acquired == -1)
   {
     resources[resource_id].acquired = pid;
@@ -815,14 +825,17 @@ int requestresource(int resource_id)
     {
       remove_edge(pid, resource_id + MAXTHREAD);
       resources[resource_id].acquired = -1;
+      release(&resources[resource_id].lock);
       release(&Graph.lock);
       return -1;
     }
 
+    release(&resources[resource_id].lock);
     release(&Graph.lock);
     return 0;
   }
 
+  release(&resources[resource_id].lock);
   release(&Graph.lock);
   return -1;
 }
@@ -839,6 +852,7 @@ int releaseresource(int resource_id)
 
   int pid = myproc()->pid;
 
+  acquire(&resources[resource_id].lock);
   if (resources[resource_id].acquired == pid)
   {
     resources[resource_id].acquired = -1;
@@ -846,10 +860,12 @@ int releaseresource(int resource_id)
   }
   else
   {
+    release(&resources[resource_id].lock);
     release(&Graph.lock);
     return -1;
   }
 
+  release(&resources[resource_id].lock);
   release(&Graph.lock);
   return 0;
 }
