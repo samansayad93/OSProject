@@ -35,3 +35,8 @@ SYSCALL(requestresource)
 SYSCALL(writeresource)
 SYSCALL(readresource)
 SYSCALL(releaseresource)
+
+// Make chnages
+//  add syscall
+//SYSCALL(requestresource)
+//SYSCALL(releaseresource)
