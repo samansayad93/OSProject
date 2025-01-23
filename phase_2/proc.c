@@ -32,6 +32,20 @@ typedef struct Node
 
 // ##################################################################
 
+Resource resources[NRESOURCE];
+
+void init_resources()
+{
+  char resource_names[NRESOURCE][4] = {"R1", "R2", "R3", "R4"};
+  for (int i = 0; i < NRESOURCE; i++)
+  {
+    resources[i].resourceid = i;
+    safestrcpy(resources[i].name, resource_names[i], sizeof(resources[i].name));
+    resources[i].acquired = -1;
+    resources[i].startaddr = 0;
+  }
+}
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -180,6 +194,8 @@ void userinit(void)
   p->state = RUNNABLE;
 
   release(&ptable.lock);
+
+  init_resources();
 }
 
 // Grow current process's memory by n bytes.
@@ -713,7 +729,6 @@ void procdump(void)
 #include "defs.h"
 // #include "proc.h"
 
-Resource resources[NRESOURCE];
 struct
 {
   struct spinlock lock;
@@ -721,18 +736,6 @@ struct
   int visited[MAXTHREAD + NRESOURCE];
   int recStack[MAXTHREAD + NRESOURCE];
 } Graph;
-
-void init_resources()
-{
-  char resource_names[NRESOURCE][4] = {"R1", "R2", "R3", "R4"};
-  for (int i = 0; i < NRESOURCE; i++)
-  {
-    resources[i].resourceid = i;
-    safestrcpy(resources[i].name, resource_names[i], sizeof(resources[i].name));
-    resources[i].acquired = -1;
-    resources[i].startaddr = 0;
-  }
-}
 
 void add_edge(int from, int to)
 {
@@ -801,6 +804,8 @@ int requestresource(int resource_id)
 
   int pid = myproc()->pid;
 
+  //cprintf("current pid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
+  
   if (resources[resource_id].acquired == -1)
   {
     resources[resource_id].acquired = pid;
