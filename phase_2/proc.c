@@ -41,6 +41,7 @@ typedef struct Node
 
 // ##################################################################
 
+//Resource *resources = (Resource *)kalloc();
 Resource resources[NRESOURCE];
 
 void init_resources()
