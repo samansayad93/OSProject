@@ -829,12 +829,27 @@ int requestresource(int resource_id)
       resources[resource_id].acquired = -1;
       //release(&resources[resource_id].lock);
       release(&Graph.lock);
-      return -1;
+      return -2;
     }
 
     //release(&resources[resource_id].lock);
     release(&Graph.lock);
     return 0;
+  }
+  else{
+    add_edge(pid, resource_id + MAXTHREAD);
+    if (has_cycle())
+    {
+      remove_edge(pid, resource_id + MAXTHREAD);
+      resources[resource_id].acquired = -1;
+      //release(&resources[resource_id].lock);
+      release(&Graph.lock);
+      return -2;
+    }
+
+    //release(&resources[resource_id].lock);
+    release(&Graph.lock);
+    return -1;
   }
 
   //release(&resources[resource_id].lock);

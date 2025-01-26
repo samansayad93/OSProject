@@ -216,20 +216,22 @@ void thread1_func(void *arg1, void *arg2)
 {
     int *tid = (int *)arg2;
     int r0 = requestresource(0);
-    sleep(50);
+    sleep(100);
     int r1 = requestresource(1);
 
     if (r1 == 0 && r0 == 0)
     {
         printf(2, "Thread %d acquired both resources\n", *tid);
-        sleep(100);
+        sleep(200);
         releaseresource(1);
+        sleep(100);
         releaseresource(0);
         printf(2, "Thread %d released both resources\n", *tid);
     }
     else
     {
         printf(2, "Thread %d resource acquire failed: r1=%d, r0=%d\n", *tid, r1, r0);
+        sleep(200);
         if (r1 == 0){
             releaseresource(1);
             printf(2, "Thread %d released r1 resources\n", *tid);
@@ -246,19 +248,21 @@ void thread2_func(void *arg1, void *arg2)
 {
     int *tid = (int *)arg2;
     int r1 = requestresource(1);
-    sleep(700);
+    sleep(100);
     int r0 = requestresource(0);
 
     if (r1 == 0 && r0 == 0)
-    {
+    {   
         printf(2, "Thread %d acquired both resources\n", *tid);
-        sleep(100);
+        sleep(200);
         releaseresource(0);
+        sleep(100);
         releaseresource(1);
     }
     else
     {
         printf(2, "Thread %d resource acquire failed: r1=%d, r0=%d\n", *tid, r1, r0);
+        sleep(200);
         if (r1 == 0){
             releaseresource(1);
             printf(2, "Thread %d released r1 resources\n", *tid);
