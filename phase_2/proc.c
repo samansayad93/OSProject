@@ -41,11 +41,12 @@ typedef struct Node
 
 // ##################################################################
 
-//Resource *resources = (Resource *)kalloc();
-Resource resources[NRESOURCE];
+Resource *resources;
+//Resource resources[NRESOURCE];
 
 void init_resources()
 {
+  resources = (Resource *)kalloc();
   char resource_names[NRESOURCE][4] = {"R1", "R2", "R3", "R4"};
   for (int i = 0; i < NRESOURCE; i++)
   {
@@ -814,9 +815,9 @@ int requestresource(int resource_id)
 
   int pid = myproc()->pid;
 
-  //cprintf("current pid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
+  //cprintf("current tid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
   
-  acquire(&resources[resource_id].lock);
+  //acquire(&resources[resource_id].lock);
   if (resources[resource_id].acquired == -1)
   {
     resources[resource_id].acquired = pid;
@@ -826,17 +827,17 @@ int requestresource(int resource_id)
     {
       remove_edge(pid, resource_id + MAXTHREAD);
       resources[resource_id].acquired = -1;
-      release(&resources[resource_id].lock);
+      //release(&resources[resource_id].lock);
       release(&Graph.lock);
       return -1;
     }
 
-    release(&resources[resource_id].lock);
+    //release(&resources[resource_id].lock);
     release(&Graph.lock);
     return 0;
   }
 
-  release(&resources[resource_id].lock);
+  //release(&resources[resource_id].lock);
   release(&Graph.lock);
   return -1;
 }
@@ -853,7 +854,8 @@ int releaseresource(int resource_id)
 
   int pid = myproc()->pid;
 
-  acquire(&resources[resource_id].lock);
+  //acquire(&resources[resource_id].lock);
+  //cprintf("current tid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
   if (resources[resource_id].acquired == pid)
   {
     resources[resource_id].acquired = -1;
@@ -861,12 +863,12 @@ int releaseresource(int resource_id)
   }
   else
   {
-    release(&resources[resource_id].lock);
+    //release(&resources[resource_id].lock);
     release(&Graph.lock);
     return -1;
   }
 
-  release(&resources[resource_id].lock);
+  //release(&resources[resource_id].lock);
   release(&Graph.lock);
   return 0;
 }
