@@ -61,7 +61,5 @@ void Lock_Init(Lock *mutex);
 void Lock_Acquire(Lock *mutex);
 void Lock_Release(Lock *mutex);
 
-// Make chnages
-//  add functions
 int requestresource(int resource_id);
 int releaseresource(int resource_id);

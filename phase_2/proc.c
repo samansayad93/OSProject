@@ -30,6 +30,7 @@ typedef struct Node
 // ################ADD Your Implementation Here######################
 Resource *resources;
 void *allocated_memory;
+Node *free_node_list;
 
 struct
 {
@@ -41,7 +42,14 @@ struct
 
 void add_edge(int from, int to)
 {
-  Node *newNode = (Node *)kalloc();
+  if (!free_node_list)
+  {
+      panic("No free nodes available");
+  }
+
+  Node *newNode = free_node_list;
+  free_node_list = free_node_list->next;
+
   newNode->vertex = to;
   newNode->next = Graph.adjList[from];
   Graph.adjList[from] = newNode;
@@ -56,12 +64,16 @@ void remove_edge(int from, int to)
     {
       Node *temp = *current;
       *current = (*current)->next;
-      kfree((char *)temp);
+
+      temp->next = free_node_list;
+      free_node_list = temp;
+
       return;
     }
     current = &((*current)->next);
-  }
 }
+}
+
 
 int dfs_cycle_detect(int vertex)
 {
@@ -113,6 +125,21 @@ void init_resources()
       resources[i].acquired = -1;
       resources[i].startaddr = 0;
   }
+  
+  Node *node_pool = (Node *)((char *)allocated_memory + 2048);
+
+  int num_nodes = (PGSIZE - 2048) / sizeof(Node);
+  for (int i = 0; i < num_nodes; i++)
+  {
+      node_pool[i].vertex = -1;
+      node_pool[i].next = 0;
+  }
+  free_node_list = node_pool;
+  for (int i = 0; i < num_nodes - 1; i++)
+  {
+      node_pool[i].next = &node_pool[i + 1];
+  }
+  node_pool[num_nodes - 1].next = 0;
 }
 
 
@@ -824,25 +851,24 @@ int requestresource(int resource_id)
 
     if (has_cycle())
     {
-      // cprintf("Deadlock detected: Process %d requesting resource %d\n", pid, resource_id);
+      cprintf("Deadlock detected while thread %d waits for resource %d\n", tid, resource_id);
       remove_edge(resource_id + MAXTHREAD, tid);
       resources[resource_id].acquired = -1;
       release(&Graph.lock);
       return -2;
     }
 
-    // cprintf("Process %d successfully acquired resource %d\n", pid, resource_id);
     release(&Graph.lock);
     return 0;
   }
   else
   {
     cprintf("Thread %d can't get resource %d\n",tid, resource_id);
-    cprintf("Resource %d is currently held by process %d\n", resource_id, resources[resource_id].acquired);
+    cprintf("Resource %d is currently held by thread %d\n", resource_id, resources[resource_id].acquired);
     add_edge(tid, resource_id + MAXTHREAD);
     if (has_cycle())
     {
-      // cprintf("Deadlock detected while process %d waits for resource %d\n", pid, resource_id);
+      cprintf("Deadlock detected while thread %d waits for resource %d\n", tid, resource_id);
       remove_edge(tid, resource_id + MAXTHREAD);
       release(&Graph.lock);
       return -2;

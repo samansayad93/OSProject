@@ -151,10 +151,3 @@ void syscall(void)
     curproc->tf->eax = -1;
   }
 }
-
-// // syscall.c
-// extern int sys_requestresource(void);
-// extern int sys_releaseresource(void);
-
-// // [SYS_requestresource] sys_requestresource,
-// //     [SYS_releaseresource] sys_releaseresource,
