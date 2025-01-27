@@ -26,8 +26,3 @@
 #define SYS_writeresource 25
 #define SYS_readresource 26
 #define SYS_releaseresource 27
-
-// Make chnages
-//  add syscall
-// #define SYS_requestresource 22
-// #define SYS_releaseresource 23

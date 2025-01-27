@@ -74,24 +74,6 @@ struct proc
   struct inode *cwd;          // Current directory
   char name[16];              // Process name (debugging)
 };
-// ##################################################################
-// typedef struct resource
-// {
-//   int resourceid;
-//   char name[4];
-//   int acquired;
-//   void *startaddr;
-// } Resource;
-// ##################################################################
-
-// Process memory is laid out contiguously, low addresses first:
-//   text
-//   original data and bss
-//   fixed-size stack
-//   expandable heap
-
-// Make chnages
-// define process
 
 enum nodetype
 {
@@ -99,9 +81,3 @@ enum nodetype
   PROCESS
 };
 
-// typedef struct Node
-// {
-//   int vertex;         // Node identifier
-//   enum nodetype type; // Node type (resource/process)
-//   struct Node *next;  // Next node in adjacency list
-// } Node;

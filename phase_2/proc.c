@@ -27,34 +27,95 @@ typedef struct Node
   enum nodetype type;
   struct Node *next;
 } Node;
-// struct
-// {
-//   struct spinlock lock;
-//   Node *adjList[MAXTHREAD + NRESOURCE];
-//   int visited[MAXTHREAD + NRESOURCE];
-//   int recStack[MAXTHREAD + NRESOURCE];
-// } Graph;
 // ################ADD Your Implementation Here######################
 
-// Graph creation and functions
+struct
+{
+  struct spinlock lock;
+  Node *adjList[MAXTHREAD + NRESOURCE];
+  int visited[MAXTHREAD + NRESOURCE];
+  int recStack[MAXTHREAD + NRESOURCE];
+} Graph;
+
+void add_edge(int from, int to)
+{
+  Node *newNode = (Node *)kalloc();
+  newNode->vertex = to;
+  newNode->next = Graph.adjList[from];
+  Graph.adjList[from] = newNode;
+}
+
+void remove_edge(int from, int to)
+{
+  Node **current = &Graph.adjList[from];
+  while (*current)
+  {
+    if ((*current)->vertex == to)
+    {
+      Node *temp = *current;
+      *current = (*current)->next;
+      kfree((char *)temp);
+      return;
+    }
+    current = &((*current)->next);
+  }
+}
+
+int dfs_cycle_detect(int vertex)
+{
+  Graph.visited[vertex] = 1;
+  Graph.recStack[vertex] = 1;
+
+  Node *temp = Graph.adjList[vertex];
+  while (temp)
+  {
+    if (!Graph.visited[temp->vertex] && dfs_cycle_detect(temp->vertex))
+      return 1;
+    else if (Graph.recStack[temp->vertex])
+      return 1;
+    temp = temp->next;
+  }
+  Graph.recStack[vertex] = 0;
+  return 0;
+}
+
+int has_cycle()
+{
+  memset(Graph.visited, 0, sizeof(Graph.visited));
+  memset(Graph.recStack, 0, sizeof(Graph.recStack));
+
+  for (int i = 0; i < MAXTHREAD + NRESOURCE; i++)
+  {
+    if (!Graph.visited[i] && dfs_cycle_detect(i))
+      return 1;
+  }
+  return 0;
+}
 
 // ##################################################################
 
 Resource *resources;
-//Resource resources[NRESOURCE];
 
 void init_resources()
 {
-  resources = (Resource *)kalloc();
+  void *allocated_memory = kalloc();
+
+  Resource *first_part = (Resource *)allocated_memory;
+  Resource *second_part = (Resource *)((char *)allocated_memory + 2048);
+
+  resources = first_part;
+
   char resource_names[NRESOURCE][4] = {"R1", "R2", "R3", "R4"};
+
   for (int i = 0; i < NRESOURCE; i++)
   {
-    resources[i].resourceid = i;
-    safestrcpy(resources[i].name, resource_names[i], sizeof(resources[i].name));
-    resources[i].acquired = -1;
-    resources[i].startaddr = 0;
+      resources[i].resourceid = i;
+      safestrcpy(resources[i].name, resource_names[i], sizeof(resources[i].name));
+      resources[i].acquired = -1;
+      resources[i].startaddr = 0;
   }
 }
+
 
 static struct proc *initproc;
 
@@ -733,75 +794,6 @@ void procdump(void)
   }
 }
 
-// Make changes
-// all algorithms
-#include "types.h"
-#include "defs.h"
-// #include "proc.h"
-
-struct
-{
-  struct spinlock lock;
-  Node *adjList[MAXTHREAD + NRESOURCE];
-  int visited[MAXTHREAD + NRESOURCE];
-  int recStack[MAXTHREAD + NRESOURCE];
-} Graph;
-
-void add_edge(int from, int to)
-{
-  Node *newNode = (Node *)kalloc();
-  newNode->vertex = to;
-  newNode->next = Graph.adjList[from];
-  Graph.adjList[from] = newNode;
-}
-
-void remove_edge(int from, int to)
-{
-  Node **current = &Graph.adjList[from];
-  while (*current)
-  {
-    if ((*current)->vertex == to)
-    {
-      Node *temp = *current;
-      *current = (*current)->next;
-      kfree((char *)temp);
-      return;
-    }
-    current = &((*current)->next);
-  }
-}
-
-int dfs_cycle_detect(int vertex)
-{
-  Graph.visited[vertex] = 1;
-  Graph.recStack[vertex] = 1;
-
-  Node *temp = Graph.adjList[vertex];
-  while (temp)
-  {
-    if (!Graph.visited[temp->vertex] && dfs_cycle_detect(temp->vertex))
-      return 1;
-    else if (Graph.recStack[temp->vertex])
-      return 1;
-    temp = temp->next;
-  }
-  Graph.recStack[vertex] = 0;
-  return 0;
-}
-
-int has_cycle()
-{
-  memset(Graph.visited, 0, sizeof(Graph.visited));
-  memset(Graph.recStack, 0, sizeof(Graph.recStack));
-
-  for (int i = 0; i < MAXTHREAD + NRESOURCE; i++)
-  {
-    if (!Graph.visited[i] && dfs_cycle_detect(i))
-      return 1;
-  }
-  return 0;
-}
-
 int find_next_waiting_process(int resource_id)
 {
   Node *current = Graph.adjList[resource_id + MAXTHREAD];
@@ -891,20 +883,6 @@ int releaseresource(int resource_id)
   return -1;
 }
 
-// int requestresource(int Resource_ID)
-// {
-//   // ################ADD Your Implementation Here######################
-
-//   // ##################################################################
-//   return -1;
-// }
-// int releaseresource(int Resource_ID)
-// {
-//   // ################ADD Your Implementation Here######################
-
-//   // ##################################################################
-//   return -1;
-// }
 int writeresource(int Resource_ID, void *buffer, int offset, int size)
 {
   // ################ADD Your Implementation Here######################
