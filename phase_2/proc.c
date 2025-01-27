@@ -13,7 +13,6 @@ typedef struct resource
   char name[4];    // Resource name
   int acquired;    // Thread ID holding the resource
   void *startaddr; // Memory start address for resource
-  struct spinlock lock; //spinlock for resources
 } Resource;
 
 struct
@@ -803,6 +802,16 @@ int has_cycle()
   return 0;
 }
 
+int find_next_waiting_process(int resource_id)
+{
+  Node *current = Graph.adjList[resource_id + MAXTHREAD];
+  while (current)
+  {
+    return current->vertex;
+  }
+  return -1;
+}
+
 int requestresource(int resource_id)
 {
   acquire(&Graph.lock);
@@ -815,9 +824,6 @@ int requestresource(int resource_id)
 
   int pid = myproc()->pid;
 
-  //cprintf("current tid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
-  
-  //acquire(&resources[resource_id].lock);
   if (resources[resource_id].acquired == -1)
   {
     resources[resource_id].acquired = pid;
@@ -827,12 +833,10 @@ int requestresource(int resource_id)
     {
       remove_edge(pid, resource_id + MAXTHREAD);
       resources[resource_id].acquired = -1;
-      //release(&resources[resource_id].lock);
       release(&Graph.lock);
       return -2;
     }
 
-    //release(&resources[resource_id].lock);
     release(&Graph.lock);
     return 0;
   }
@@ -841,20 +845,13 @@ int requestresource(int resource_id)
     if (has_cycle())
     {
       remove_edge(pid, resource_id + MAXTHREAD);
-      resources[resource_id].acquired = -1;
-      //release(&resources[resource_id].lock);
       release(&Graph.lock);
       return -2;
     }
 
-    //release(&resources[resource_id].lock);
     release(&Graph.lock);
     return -1;
   }
-
-  //release(&resources[resource_id].lock);
-  release(&Graph.lock);
-  return -1;
 }
 
 int releaseresource(int resource_id)
@@ -869,23 +866,29 @@ int releaseresource(int resource_id)
 
   int pid = myproc()->pid;
 
-  //acquire(&resources[resource_id].lock);
-  //cprintf("current tid: %d current rid: %d current status: %d\n",myproc()->tid,resource_id,resources[resource_id].acquired);
   if (resources[resource_id].acquired == pid)
   {
     resources[resource_id].acquired = -1;
     remove_edge(pid, resource_id + MAXTHREAD);
-  }
-  else
-  {
-    //release(&resources[resource_id].lock);
+
+    int next_pid = find_next_waiting_process(resource_id);
+    if (next_pid != -1)
+    {
+      resources[resource_id].acquired = next_pid;
+      add_edge(next_pid, resource_id + MAXTHREAD);
+
+      if (has_cycle())
+      {
+        remove_edge(next_pid, resource_id + MAXTHREAD);
+        resources[resource_id].acquired = -1;
+      }
+    }
     release(&Graph.lock);
-    return -1;
+    return 0;
   }
 
-  //release(&resources[resource_id].lock);
   release(&Graph.lock);
-  return 0;
+  return -1;
 }
 
 // int requestresource(int Resource_ID)
